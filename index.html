@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Food Journey</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
+        
+        * {
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+        }
+
+        .main-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.9));
+            backdrop-filter: blur(30px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.25);
+        }
+
+        .section-card {
+            background: white;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .section-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        }
+
+        .food-card {
+            background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .food-card:hover {
+            border-color: #667eea;
+            transform: translateX(8px);
+            box-shadow: 0 8px 30px rgba(102, 126, 234, 0.2);
+        }
+
+        .fear-food-card {
+            background: linear-gradient(135deg, #fff5f5 0%, #ffe5e5 100%);
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .fear-food-card:hover {
+            border-color: #f56565;
+            transform: translateX(8px);
+            box-shadow: 0 8px 30px rgba(245, 101, 101, 0.2);
+        }
+
+        .goal-card {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            transition: all 0.3s ease;
+        }
+
+        .goal-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn {
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .tab {
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .tab.active {
+            background: white;
+            color: #667eea;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .tab.active::before {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 4px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 4px;
+        }
+
+        .page {
+            animation: fadeSlide 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes fadeSlide {
+            from {
+                opacity: 0;
+                transform: translateY(40px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .progress-bar {
+            transition: width 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .meal-badge {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            border: 1px solid rgba(102, 126, 234, 0.3);
+        }
+
+        .rating-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .modal-backdrop {
+            backdrop-filter: blur(10px);
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .hidden { display: none !important; }
+
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #764ba2, #667eea);
+        }
+
+        .stat-number {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+    </style>
+</head>
+<body class="p-6 lg:p-10">
+    <script>
+        // Define all functions IMMEDIATELY at page load before ANY HTML tries to use them
+        (function() {
+            // State variables
+            window.safeFoods = JSON.parse(sessionStorage.getItem('safeFoods')) || [];
+            window.fearFoods = JSON.parse(sessionStorage.getItem('fearFoods')) || [];
+            window.goals = JSON.parse(sessionStorage.getItem('goals')) || [];
+            
+            window.previousValues = {
+                food: { mealtime: '', rating: '' },
+                fear: { mealtime: '', difficulty: '' }
+            };
+
+            // Save to sessionStorage
+            window.saveData = function() {
+                sessionStorage.setItem('safeFoods', JSON.stringify(window.safeFoods));
+                sessionStorage.setItem('fearFoods', JSON.stringify(window.fearFoods));
+                sessionStorage.setItem('goals', JSON.stringify(window.goals));
+            };
+
+            // Navigation
+            window.showPage = function(page) {
+                console.log('showPage called with:', page);
+                document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+                document.getElementById(page + '-page').classList.remove('hidden');
+                
+                document.querySelectorAll('.tab').forEach(btn => btn.classList.remove('active'));
+                document.getElementById('tab-' + page).classList.add('active');
+            };
+
+            window.openFoodModal = function() {
+                document.getElementById('food-modal').classList.remove('hidden');
+                window.previousValues.food = { mealtime: '', rating: '' };
+                setTimeout(() => document.getElementById('food-name').focus(), 100);
+            };
+
+            window.openFearFoodModal = function() {
+                document.getElementById('fear-food-modal').classList.remove('hidden');
+                window.previousValues.fear = { mealtime: '', difficulty: '' };
+                setTimeout(() => document.getElementById('fear-food-name').focus(), 100);
+            };
+
+            window.openGoalModal = function() {
+                document.getElementById('goal-modal').classList.remove('hidden');
+                setTimeout(() => document.getElementById('goal-title').focus(), 100);
+            };
+
+            window.closeModal = function(id) {
+                document.getElementById(id).classList.add('hidden');
+                document.querySelectorAll(`#${id} input, #${id} textarea, #${id} select`).forEach(el => el.value = '');
+                window.previousValues.food = { mealtime: '', rating: '' };
+                window.previousValues.fear = { mealtime: '', difficulty: '' };
+            };
+
+            window.clearModalOnChange = function(type) {
+                if (type === 'food') {
+                    const currentMealtime = document.getElementById('food-mealtime').value;
+                    const currentRating = document.getElementById('food-rating').value;
+                    
+                    if (window.previousValues.food.mealtime && currentMealtime !== window.previousValues.food.mealtime) {
+                        document.getElementById('food-name').value = '';
+                        document.getElementById('food-notes').value = '';
+                    }
+                    if (window.previousValues.food.rating && currentRating !== window.previousValues.food.rating) {
+                        document.getElementById('food-name').value = '';
+                        document.getElementById('food-notes').value = '';
+                    }
+                    
+                    window.previousValues.food = { mealtime: currentMealtime, rating: currentRating };
+                } else if (type === 'fear') {
+                    const currentMealtime = document.getElementById('fear-food-mealtime').value;
+                    const currentDifficulty = document.getElementById('fear-food-difficulty').value;
+                    
+                    if (window.previousValues.fear.mealtime && currentMealtime !== window.previousValues.fear.mealtime) {
+                        document.getElementById('fear-food-name').value = '';
+                        document.getElementById('fear-food-notes').value = '';
+                    }
+                    if (window.previousValues.fear.difficulty && currentDifficulty !== window.previousValues.fear.difficulty) {
+                        document.getElementById('fear-food-name').value = '';
+                        document.getElementById('fear-food-notes').value = '';
+                    }
+                    
+                    window.previousValues.fear = { mealtime: currentMealtime, difficulty: currentDifficulty };
+                }
+            };
+
+            window.addFood = function() {
+                const name = document.getElementById('food-name').value.trim();
+                const mealtime = document.getElementById('food-mealtime').value;
+                const rating = document.getElementById('food-rating').value;
+                const notes = document.getElementById('food-notes').value.trim();
+
+                if (!name || !mealtime || !rating) {
+                    window.showToast('Please fill in all required fields', 'error');
+                    return;
+                }
+
+                window.safeFoods.push({
+                    id: Date.now(),
+                    name,
+                    mealtime,
+                    rating,
+                    notes,
+                    dateAdded: new Date().toISOString()
+                });
+
+                window.saveData();
+                window.renderAll();
+                window.closeModal('food-modal');
+                window.showToast('🎉 Safe food added successfully!');
+            };
+
+            window.addFearFood = function() {
+                const name = document.getElementById('fear-food-name').value.trim();
+                const mealtime = document.getElementById('fear-food-mealtime').value;
+                const difficulty = document.getElementById('fear-food-difficulty').value;
+                const notes = document.getElementById('fear-food-notes').value.trim();
+
+                if (!name || !mealtime || !difficulty) {
+                    window.showToast('Please fill in all required fields', 'error');
+                    return;
+                }
+
+                window.fearFoods.push({
+                    id: Date.now(),
+                    name,
+                    mealtime,
+                    difficulty,
+                    notes,
+                    dateAdded: new Date().toISOString()
+                });
+
+                window.saveData();
+                window.renderAll();
+                window.closeModal('fear-food-modal');
+                window.showToast('💪 Fear food added - you\'re brave for tracking this!');
+            };
+
+            window.addGoal = function() {
+                const title = document.getElementById('goal-title').value.trim();
+                const target = parseInt(document.getElementById('goal-target').value) || null;
+                const description = document.getElementById('goal-description').value.trim();
+
+                if (!title) {
+                    window.showToast('Please enter a goal title', 'error');
+                    return;
+                }
+
+                window.goals.push({
+                    id: Date.now(),
+                    title,
+                    target,
+                    current: 0,
+                    description,
+                    dateCreated: new Date().toISOString()
+                });
+
+                window.saveData();
+                window.renderAll();
+                window.closeModal('goal-modal');
+                window.showToast('⭐ Goal set! You can do this!');
+            };
+
+            window.deleteFood = function(id) {
+                if (confirm('Remove this safe food?')) {
+                    window.safeFoods = window.safeFoods.filter(f => f.id !== id);
+                    window.saveData();
+                    window.renderAll();
+                    window.showToast('Food removed', 'info');
+                }
+            };
+
+            window.deleteFearFood = function(id) {
+                if (confirm('Remove this fear food?')) {
+                    window.fearFoods = window.fearFoods.filter(f => f.id !== id);
+                    window.saveData();
+                    window.renderAll();
+                    window.showToast('Fear food removed', 'info');
+                }
+            };
+
+            window.deleteGoal = function(id) {
+                if (confirm('Remove this goal?')) {
+                    window.goals = window.goals.filter(g => g.id !== id);
+                    window.saveData();
+                    window.renderAll();
+                    window.showToast('Goal removed', 'info');
+                }
+            };
+
+            window.moveFearToSafe = function(id) {
+                const fearFood = window.fearFoods.find(f => f.id === id);
+                if (fearFood && confirm(`Move "${fearFood.name}" to Safe Foods?`)) {
+                    window.safeFoods.push({
+                        id: Date.now(),
+                        name: fearFood.name,
+                        mealtime: fearFood.mealtime,
+                        rating: '3',
+                        notes: fearFood.notes || 'Conquered fear food!',
+                        dateAdded: new Date().toISOString()
+                    });
+                    window.fearFoods = window.fearFoods.filter(f => f.id !== id);
+                    window.saveData();
+                    window.renderAll();
+                    window.showToast('🎉 Amazing! Food moved to Safe Foods!', 'celebration');
+                }
+            };
+
+            window.updateGoal = function(id, change) {
+                const goal = window.goals.find(g => g.id === id);
+                if (goal && goal.target) {
+                    goal.current = Math.max(0, Math.min((goal.current || 0) + change, goal.target));
+                    window.saveData();
+                    window.renderGoals();
+                    
+                    if (goal.current === goal.target) {
+                        window.showToast('🎉 Goal completed! Amazing work!', 'celebration');
+                    } else if (change > 0) {
+                        window.showToast('💪 Progress updated!', 'success');
+                    }
+                }
+            };
+
+            window.showToast = function(message, type = 'success') {
+                const toast = document.createElement('div');
+                const colors = {
+                    success: 'from-green-500 to-emerald-600',
+                    error: 'from-red-500 to-red-600',
+                    info: 'from-blue-500 to-indigo-600',
+                    celebration: 'from-purple-500 via-pink-500 to-purple-600'
+                };
+
+                toast.className = `fixed top-8 right-8 bg-gradient-to-r ${colors[type]} text-white px-8 py-5 rounded-2xl shadow-2xl z-50 transform transition-all duration-500`;
+                toast.style.animation = 'fadeSlide 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                toast.innerHTML = `<p class="font-bold text-lg">${message}</p>`;
+
+                document.body.appendChild(toast);
+
+                setTimeout(() => {
+                    toast.style.transform = 'translateX(500px)';
+                    toast.style.opacity = '0';
+                    setTimeout(() => {
+                        if (document.body.contains(toast)) {
+                            document.body.removeChild(toast);
+                        }
+                    }, 500);
+                }, 3500);
+            };
+
+            console.log('All window functions defined!');
+        })();
+    </script>
+    <div class="max-w-5xl mx-auto">
+        <!-- Header -->
+        <div class="main-card rounded-3xl p-10 mb-8 text-center">
+            <div class="text-7xl mb-5">🌟</div>
+            <h1 class="text-6xl font-bold mb-4 bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 bg-clip-text text-transparent">
+                My Food Journey
+            </h1>
+            <p class="text-xl text-gray-600 font-medium">Building confidence, one step at a time</p>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="main-card rounded-2xl p-6 mb-8">
+            <div class="flex flex-wrap justify-center gap-4">
+                <button onclick="showPage('overview')" id="tab-overview" class="tab active px-8 py-4 rounded-xl font-semibold text-lg relative">
+                    📊 Overview
+                </button>
+                <button onclick="showPage('safe-foods')" id="tab-safe-foods" class="tab px-8 py-4 rounded-xl font-semibold text-lg text-white hover:bg-white/10 relative">
+                    ✅ Safe Foods
+                </button>
+                <button onclick="showPage('fear-foods')" id="tab-fear-foods" class="tab px-8 py-4 rounded-xl font-semibold text-lg text-white hover:bg-white/10 relative">
+                    🎯 Fear Foods
+                </button>
+                <button onclick="showPage('goals')" id="tab-goals" class="tab px-8 py-4 rounded-xl font-semibold text-lg text-white hover:bg-white/10 relative">
+                    ⭐ Goals
+                </button>
+            </div>
+        </div>
+
+        <!-- Overview Page -->
+        <div id="overview-page" class="page">
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="section-card rounded-3xl p-8">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <p class="text-gray-500 font-semibold uppercase text-sm mb-2">Safe Foods</p>
+                            <h2 class="text-6xl font-bold stat-number" id="overview-foods-count">0</h2>
+                        </div>
+                        <div class="w-20 h-20 bg-gradient-to-br from-green-400 to-emerald-500 rounded-2xl flex items-center justify-center text-4xl shadow-lg">
+                            ✅
+                        </div>
+                    </div>
+                    <button onclick="showPage('safe-foods')" class="w-full btn btn-success py-3 rounded-xl font-semibold text-lg">
+                        View All →
+                    </button>
+                </div>
+
+                <div class="section-card rounded-3xl p-8">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <p class="text-gray-500 font-semibold uppercase text-sm mb-2">Fear Foods</p>
+                            <h2 class="text-6xl font-bold stat-number" id="overview-fear-count">0</h2>
+                        </div>
+                        <div class="w-20 h-20 bg-gradient-to-br from-red-400 to-pink-500 rounded-2xl flex items-center justify-center text-4xl shadow-lg">
+                            🎯
+                        </div>
+                    </div>
+                    <button onclick="showPage('fear-foods')" class="w-full btn btn-warning py-3 rounded-xl font-semibold text-lg">
+                        View All →
+                    </button>
+                </div>
+
+                <div class="section-card rounded-3xl p-8">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <p class="text-gray-500 font-semibold uppercase text-sm mb-2">Active Goals</p>
+                            <h2 class="text-6xl font-bold stat-number" id="overview-goals-count">0</h2>
+                        </div>
+                        <div class="w-20 h-20 bg-gradient-to-br from-purple-400 to-pink-500 rounded-2xl flex items-center justify-center text-4xl shadow-lg">
+                            ⭐
+                        </div>
+                    </div>
+                    <button onclick="showPage('goals')" class="w-full btn btn-primary py-3 rounded-xl font-semibold text-lg">
+                        View All →
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Safe Foods Page -->
+        <div id="safe-foods-page" class="page hidden">
+            <div class="section-card rounded-3xl p-8 mb-6">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div>
+                        <h2 class="text-4xl font-bold text-gray-800 mb-2">✅ My Safe Foods</h2>
+                        <p class="text-gray-600 text-lg">Foods that bring comfort and nourishment</p>
+                    </div>
+                    <button onclick="openFoodModal()" class="btn btn-success px-8 py-4 rounded-xl font-semibold text-lg whitespace-nowrap">
+                        + Add Food
+                    </button>
+                </div>
+            </div>
+
+            <div id="safe-foods-container"></div>
+        </div>
+
+        <!-- Fear Foods Page -->
+        <div id="fear-foods-page" class="page hidden">
+            <div class="section-card rounded-3xl p-8 mb-6">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div>
+                        <h2 class="text-4xl font-bold text-gray-800 mb-2">🎯 Fear Foods</h2>
+                        <p class="text-gray-600 text-lg">Foods you're working towards trying - small steps count!</p>
+                    </div>
+                    <button onclick="openFearFoodModal()" class="btn btn-warning px-8 py-4 rounded-xl font-semibold text-lg whitespace-nowrap">
+                        + Add Food
+                    </button>
+                </div>
+            </div>
+
+            <div id="fear-foods-container"></div>
+        </div>
+
+        <!-- Goals Page -->
+        <div id="goals-page" class="page hidden">
+            <div class="section-card rounded-3xl p-8 mb-6">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div>
+                        <h2 class="text-4xl font-bold text-gray-800 mb-2">⭐ My Goals</h2>
+                        <p class="text-gray-600 text-lg">Meaningful milestones for your journey</p>
+                    </div>
+                    <button onclick="openGoalModal()" class="btn btn-primary px-8 py-4 rounded-xl font-semibold text-lg whitespace-nowrap">
+                        + Add Goal
+                    </button>
+                </div>
+            </div>
+
+            <div id="goals-container"></div>
+        </div>
+    </div>
+
+    <!-- Add Safe Food Modal -->
+    <div id="food-modal" class="hidden fixed inset-0 bg-black/50 modal-backdrop flex items-center justify-center p-4 z-50">
+        <div class="main-card rounded-3xl p-8 max-w-lg w-full modal-content">
+            <h3 class="text-3xl font-bold text-gray-800 mb-6">Add Safe Food</h3>
+            <div class="space-y-5">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">Food Name *</label>
+                    <input type="text" id="food-name" placeholder="e.g., Plain pasta" class="w-full p-4 border-2 border-gray-200 rounded-xl text-lg transition-all">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">Meal Time *</label>
+                    <select id="food-mealtime" onchange="clearModalOnChange('food')" class="w-full p-4 border-2 border-gray-200 rounded-xl text-lg transition-all">
+                        <option value="">Select when you eat this</option>
+                        <option value="breakfast">🌅 Breakfast</option>
+                        <option value="lunch">☀️ Lunch</option>
+                        <option value="dinner">🌙 Dinner</option>
+                        <option value="snack">🍪 Snack</option>
+                        <option value="anytime">⏰ Anytime</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">How Much Do You Like It? *</label>
+                    <select id="food-rating" onchange="clearModalOnChange('food')" class="w-full p-4 border-2 border-gray-200 rounded-xl text-lg transition-all">
+                        <option value="">Select rating</option>
+                        <option value="5">😍 Love it!</option>
+                        <option value="4">😊 Really like it</option>
+                        <option value="3">🙂 It's okay</option>
+                        <option value="2">😐 Tolerable</option>
+                        <option value="1">😕 Barely safe</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">Notes (Optional)</label>
+                    <textarea id="food-notes" placeholder="What makes this food safe for you?" class="w-full p-4 border-2 border-gray-200 rounded-xl text-lg transition-all" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="flex gap-4 mt-8">
+                <button onclick="closeModal('food-modal')" class="flex-1 px-6 py-4 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-xl font-semibold text-lg transition-all">
+                    Cancel
+                </button>
+                <button onclick="addFood()" class="flex-1 btn btn-success px-6 py-4 rounded-xl font-semibold text-lg">
+                    Add Food
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Fear Food Modal -->
+    <div id="fear-food-modal" class="hidden fixed inset-0 bg-black/50 modal-backdrop flex items-center justify-center p-4 z-50">
+        <div class="main-card rounded-3xl p-8 max-w-lg w-full modal-content">
+            <h3 class="text-3xl font-bold text-gray-800 mb-6">Add Fear Food</h3>
+            <div class="space-y-5">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">Food Name *</label>
+                    <input type="text" id="fear-food-name" placeholder="e.g., Strawberries" class="w-full p-4 border-2 border-gray-200 rounded-xl text-lg transition-all">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">Meal Time *</label>
+                    <select id="fear-food-mealtime" onchange="clearModalOnChange('fear')" class="w-full p-4 border-2 border-gray-200 rounded-xl text-lg transition-all">
+                        <option value="">Select when you'd eat this</option>
+                        <option value="breakfast">🌅 Breakfast</option>
+                        <option value="lunch">☀️ Lunch</option>
+                        <option value="dinner">🌙 Dinner</option>
+                        <option value="snack">🍪 Snack</option>
+                        <option value="anytime">⏰ Anytime</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">Challenge Level *</label>
+                    <select id="fear-food-difficulty" onchange="clearModalOnChange('fear')" class="w-full p-4 border-2 border-gray-200 rounded-xl text-lg transition-all">
+                        <option value="">How challenging is this?</option>
+                        <option value="1">😰 Very challenging</option>
+                        <option value="2">😟 Quite difficult</option>
+                        <option value="3">😐 Somewhat hard</option>
+                        <option value="4">🙂 Mildly challenging</option>
+                        <option value="5">😊 Almost ready</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">Why is this challenging?</label>
+                    <textarea id="fear-food-notes" placeholder="Optional: Texture, smell, appearance, etc." class="w-full p-4 border-2 border-gray-200 rounded-xl text-lg transition-all" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="flex gap-4 mt-8">
+                <button onclick="closeModal('fear-food-modal')" class="flex-1 px-6 py-4 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-xl font-semibold text-lg transition-all">
+                    Cancel
+                </button>
+                <button onclick="addFearFood()" class="flex-1 btn btn-warning px-6 py-4 rounded-xl font-semibold text-lg">
+                    Add Food
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Goal Modal -->
+    <div id="goal-modal" class="hidden fixed inset-0 bg-black/50 modal-backdrop flex items-center justify-center p-4 z-50">
+        <div class="main-card rounded-3xl p-8 max-w-lg w-full modal-content">
+            <h3 class="text-3xl font-bold text-gray-800 mb-6">Set a Goal</h3>
+            <div class="space-y-5">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">Goal Title *</label>
+                    <input type="text" id="goal-title" placeholder="e.g., Try 5 new foods this month" class="w-full p-4 border-2 border-gray-200 rounded-xl text-lg transition-all">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">Target Number (Optional)</label>
+                    <input type="number" id="goal-target" placeholder="e.g., 5" min="1" class="w-full p-4 border-2 border-gray-200 rounded-xl text-lg transition-all">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">Description</label>
+                    <textarea id="goal-description" placeholder="What does success look like for this goal?" class="w-full p-4 border-2 border-gray-200 rounded-xl text-lg transition-all" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="flex gap-4 mt-8">
+                <button onclick="closeModal('goal-modal')" class="flex-1 px-6 py-4 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-xl font-semibold text-lg transition-all">
+                    Cancel
+                </button>
+                <button onclick="addGoal()" class="flex-1 btn btn-primary px-6 py-4 rounded-xl font-semibold text-lg">
+                    Set Goal
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Render and helper functions (called after DOM loads)
+        function saveData() {
+            sessionStorage.setItem('safeFoods', JSON.stringify(window.safeFoods));
+            sessionStorage.setItem('fearFoods', JSON.stringify(window.fearFoods));
+            sessionStorage.setItem('goals', JSON.stringify(window.goals));
+        }
+
+        // Initialize
+        function init() {
+            window.renderAll();
+        }
+
+        // Render All
+        window.renderAll = function() {
+            renderOverview();
+            renderSafeFoods();
+            renderFearFoods();
+            renderGoals();
+        };
+
+        function renderOverview() {
+            document.getElementById('overview-foods-count').textContent = window.safeFoods.length;
+            document.getElementById('overview-fear-count').textContent = window.fearFoods.length;
+            document.getElementById('overview-goals-count').textContent = window.goals.length;
+        }
+
+        window.renderGoals = function() {
+            const container = document.getElementById('goals-container');
+            
+            if (window.goals.length === 0) {
+                container.innerHTML = `
+                    <div class="section-card rounded-3xl p-12 text-center">
+                        <div class="text-6xl mb-4">🎯</div>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-3">No goals yet</h3>
+                        <p class="text-gray-600 mb-6">Click "+ Add Goal" above to set your first goal</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = window.goals.map(goal => `
+                <div class="goal-card rounded-3xl p-8 mb-6">
+                    <div class="flex justify-between items-start mb-6">
+                        <div class="flex-1">
+                            <h3 class="text-2xl font-bold text-gray-800 mb-2">${goal.title}</h3>
+                            ${goal.description ? `<p class="text-gray-700 text-lg">${goal.description}</p>` : ''}
+                        </div>
+                        <button onclick="deleteGoal(${goal.id})" class="ml-4 text-red-500 hover:text-red-700 hover:bg-red-50 p-3 rounded-xl transition-all">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    ${goal.target ? `
+                        <div>
+                            <div class="flex justify-between text-lg font-semibold text-gray-700 mb-3">
+                                <span>Progress</span>
+                                <span>${goal.current || 0} / ${goal.target}</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden mb-4">
+                                <div class="progress-bar bg-gradient-to-r from-purple-500 to-pink-500 h-4 rounded-full" style="width: ${Math.min(((goal.current || 0) / goal.target) * 100, 100)}%"></div>
+                            </div>
+                            <div class="flex gap-3">
+                                <button onclick="updateGoal(${goal.id}, 1)" class="flex-1 btn btn-success py-3 rounded-xl font-semibold">
+                                    + Add Progress
+                                </button>
+                                ${goal.current > 0 ? `
+                                    <button onclick="updateGoal(${goal.id}, -1)" class="flex-1 bg-gray-200 hover:bg-gray-300 py-3 rounded-xl font-semibold transition-all">
+                                        − Decrease
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+        };
+
+        // Render and helper functions
+        function getRatingDisplay(rating) {
+            const ratings = {
+                '5': '<span class="rating-badge bg-green-100 text-green-800">😍 Love it!</span>',
+                '4': '<span class="rating-badge bg-lime-100 text-lime-800">😊 Really like it</span>',
+                '3': '<span class="rating-badge bg-yellow-100 text-yellow-800">🙂 It\'s okay</span>',
+                '2': '<span class="rating-badge bg-orange-100 text-orange-800">😐 Tolerable</span>',
+                '1': '<span class="rating-badge bg-red-100 text-red-800">😕 Barely safe</span>'
+            };
+            return ratings[rating] || '';
+        }
+
+        function getDifficultyDisplay(difficulty) {
+            const difficulties = {
+                '1': '<span class="rating-badge bg-red-100 text-red-800">😰 Very challenging</span>',
+                '2': '<span class="rating-badge bg-orange-100 text-orange-800">😟 Quite difficult</span>',
+                '3': '<span class="rating-badge bg-yellow-100 text-yellow-800">😐 Somewhat hard</span>',
+                '4': '<span class="rating-badge bg-lime-100 text-lime-800">🙂 Mildly challenging</span>',
+                '5': '<span class="rating-badge bg-green-100 text-green-800">😊 Almost ready</span>'
+            };
+            return difficulties[difficulty] || '';
+        }
+
+        function renderSafeFoods() {
+            const container = document.getElementById('safe-foods-container');
+            
+            if (window.safeFoods.length === 0) {
+                container.innerHTML = `
+                    <div class="section-card rounded-3xl p-12 text-center">
+                        <div class="text-6xl mb-4">🍽️</div>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-3">No safe foods yet</h3>
+                        <p class="text-gray-600 mb-6">Click "+ Add Food" above to start building your list</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Group by meal time
+            const mealTimes = {};
+            window.safeFoods.forEach(food => {
+                if (!mealTimes[food.mealtime]) mealTimes[food.
